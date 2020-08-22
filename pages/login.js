@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { useMutate } from "restful-react";
 import { useRouter } from 'next/router';
 
+// restful-react exposes an additional hook called useMutate. These components allow sending requests with other HTTP verbs in order to mutate backend resources.
+
 const Login = () => {
   const router = useRouter();
   const { mutate: login, loading, error } = useMutate({
