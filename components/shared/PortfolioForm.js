@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Alert } from 'react-bootstrap'
+import DatePicker from "react-datepicker"
 
 // true -> input is valid
 // false -> input is NOT valid
@@ -11,18 +13,47 @@ const firstLetterUpper = iText => {
   }
 
   return false
-  // return iText[0].toUpperCase() === iText[0];
+}
+const isDateInFuture = date => {
+  if (!date) { return false }
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  // if (date > today) {
+  //   return false
+  // }
+
+  // return true
+
+  return !(date > today)
 }
 
 const PortfolioForm = ({ onSubmit }) => {
 
-  const { register, handleSubmit, errors } = useForm()
+  const { register, handleSubmit, errors, setValue, watch, setError, clearError } = useForm()
+
+  const startDate = watch('startDate')
+  const endDate = watch('endDate')
+
+  useEffect(() => {
+    register({ name: 'startDate', type: 'custom' }, { validate: { isDateInFuture } })
+    register({ name: 'endDate', type: 'custom' }, { validate: { isDateInFuture } })
+  }, [])
+
+  const handleDateChange = dateType => date => {
+    if (!isDateInFuture(date)) {
+      setError(dateType, 'isDateInFuture')
+    } else {
+      clearError(dateType, 'isDateInFuture')
+    }
+    setValue(dateType, date)
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="form-group">
         <label htmlFor="title">Title</label>
         <input
-          ref={register({ required: true, maxLength: 30, validate: { firstLetterUpper }})}
+          ref={register({ required: true, maxLength: 30, validate: { firstLetterUpper } })}
           name="title"
           type="text"
           className="form-control"
@@ -32,7 +63,7 @@ const PortfolioForm = ({ onSubmit }) => {
           <Alert variant="danger">
             {errors.title.type == 'required' && <p>Title is required</p>}
             {errors.title.type == 'maxLength' && <p>Maximum of 30characters</p>}
-            { errors.title.type === "firstLetterUpper" && <p>First letter should be uppercased!</p> }
+            {errors.title.type === "firstLetterUpper" && <p>First letter should be uppercased!</p>}
           </Alert>
         }
       </div>
@@ -120,6 +151,37 @@ const PortfolioForm = ({ onSubmit }) => {
           </Alert>
         }
       </div>
+      <div className="form-group">
+        <label htmlFor="startDate">Start Date</label>
+        <div>
+          <DatePicker
+            showYearDropdown
+            selected={startDate}
+            onChange={handleDateChange('startDate')}
+          />
+          {errors.startDate &&
+            <Alert variant="danger">
+              {errors.startDate.type === "isDateInFuture" && <p>Please choose present or past date!</p>}
+            </Alert>
+          }
+        </div>
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="endDate">End Date</label>
+        <div>
+          <DatePicker
+            showYearDropdown
+            selected={endDate}
+            onChange={handleDateChange('endDate')}
+          />
+          {errors.endDate &&
+            <Alert variant="danger">
+              {errors.endDate.type === "isDateInFuture" && <p>Please choose present or past date!</p>}
+            </Alert>
+          }
+        </div>
+      </div>
       <button
         type="submit"
         className="btn btn-primary">Create
@@ -128,4 +190,4 @@ const PortfolioForm = ({ onSubmit }) => {
   )
 }
 
-export default PortfolioForm;
+export default PortfolioForm
