@@ -27,5 +27,8 @@
     "react-hook-form": "^5.7.2",
     "restful-react": "^13.0.0",
     "sass": "^1.26.8"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
   }
 }

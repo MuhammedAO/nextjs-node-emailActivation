@@ -87,5 +87,16 @@ app.post('/api/login', async (req, res) => {
   }
 })
 
+
+app.post('/api/image-upload', async (req,res) => {
+  try {
+    if(!req.file) {throw new Error('Choose an image')}
+
+    return res.json({message:"Upload Successful"})
+  } catch (error) {
+    return res.status(422).send({message: error.message})
+  }
+})
+
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`> Connected to ${PORT}`))
