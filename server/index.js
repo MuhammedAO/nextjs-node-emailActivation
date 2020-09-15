@@ -4,7 +4,9 @@ const app = express()
 const User = require('./db/user')
 const PendingUser = require('./db/pending-user')
 const bodyParser = require('body-parser')
-
+const { cloudinaryUpload } = require('./services/cloudinary')
+const { dataUri } = require('./services/data-uri')
+const { upload } = require('./services/multer')
 
 const { sendConfirmationEmail } = require('./mailer')
 
@@ -88,13 +90,26 @@ app.post('/api/login', async (req, res) => {
 })
 
 
-app.post('/api/image-upload', async (req,res) => {
-  try {
-    if(!req.file) {throw new Error('Choose an image')}
+const singleUpload = upload.single('image')
 
-    return res.json({message:"Upload Successful"})
+const singleUploadCtrl = (req, res, next) => {
+  singleUpload(req, res, (error) => {
+    if (error) {
+      return res.status(422).send({ message: 'Image upload failed' })
+    }
+    next()
+  })
+}
+
+app.post('/api/image-upload', singleUploadCtrl, async (req, res) => {
+  try {
+    if (!req.file) { throw new Error('Choose an image') }
+    const file64 = dataUri(req.file)
+    const uploadResult = await cloudinaryUpload(file64.content)
+
+    return res.json({ cloudinaryId: uploadResult.public_id, url: uploadResult.secure_url })
   } catch (error) {
-    return res.status(422).send({message: error.message})
+    return res.status(422).send({ message: error.message })
   }
 })
 

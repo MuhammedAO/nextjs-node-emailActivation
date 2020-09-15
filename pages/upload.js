@@ -4,6 +4,7 @@ import { PageTitle } from 'components/shared'
 
 const Upload = () => {
   const [selectedImage, setselectedImage] = useState()
+  const [images, setImages] = useState([])
   const { mutate: uploadImage } = useMutate({
     verb: "POST",
     path: "image-upload"
@@ -22,7 +23,8 @@ const Upload = () => {
 
     uploadImage(formData)
       .then(uploadedImage => {
-        console.log(uploadedImage)
+        // console.log(uploadedImage)
+        setImages([...images, uploadedImage])
       })
       .catch(err => console.log(err))
   }
@@ -42,6 +44,15 @@ const Upload = () => {
           className="btn btn-primary mb-2">
           Upload
       </button>
+      </div>
+      <div className="row text-center text-lg-left">
+        {images.map(image => (
+          <div className="col-md-3" key={image.cloudinaryId}>
+            <a href={image.url} target="_blank" className="d-block mb-4 h-100">
+              <img src={image.url} alt="vase" className="img-fluid img-thumbnail" />
+            </a>
+          </div>
+        ))}
       </div>
     </React.Fragment>
   )
